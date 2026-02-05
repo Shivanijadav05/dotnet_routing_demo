@@ -68,3 +68,7 @@ D:\Main-project\dotnet\new\MyWebApi\obj\Debug\net9.0\refint\MyWebApi.dll
 D:\Main-project\dotnet\new\MyWebApi\obj\Debug\net9.0\MyWebApi.pdb
 D:\Main-project\dotnet\new\MyWebApi\obj\Debug\net9.0\MyWebApi.genruntimeconfig.cache
 D:\Main-project\dotnet\new\MyWebApi\obj\Debug\net9.0\ref\MyWebApi.dll
+D:\Main-project\dotnet\new\MyWebApi\bin\Debug\net9.0\FluentValidation.dll
+D:\Main-project\dotnet\new\MyWebApi\bin\Debug\net9.0\FluentValidation.AspNetCore.dll
+D:\Main-project\dotnet\new\MyWebApi\bin\Debug\net9.0\FluentValidation.DependencyInjectionExtensions.dll
+D:\Main-project\dotnet\new\MyWebApi\obj\Debug\net9.0\MyWebApi.sourcelink.json

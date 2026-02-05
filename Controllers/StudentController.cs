@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MyWebApi.Models;
+using Microsoft.Extensions.Logging;
 
 using MyWebApi.DTOs;
 
@@ -12,17 +13,19 @@ namespace MyWebApi.Controllers
     {
 
         private readonly IStudentRepository _repository;
+        private readonly ILogger<StudentController> _myLogger;
 
-        public StudentController(IStudentRepository repository)
+        public StudentController(IStudentRepository repository,ILogger<StudentController> Logger)
         {
             _repository=repository;
+            _myLogger=Logger;
         }
 
 
         [HttpGet]
         public ActionResult<IEnumerable<StudentDTO>> GetStudents()
         {
-                   
+                   _myLogger.LogInformation("GETTINGT STUDENTS");
                 var students=_repository.GetStudents().Select(s=>new StudentDTO()
                 {
                         Id=s.Id,
@@ -58,6 +61,29 @@ namespace MyWebApi.Controllers
             return Ok(studentDTO);
             
         }
+                // creating student using fluent validations 
+        [HttpPost]
+        [Route("create-fluent")]
+        public ActionResult<Student> CreateStudentFluent([FromBody]StudentDTOFluent dto)
+        {
+                 
+             Student student=new Student
+            {
+                
+                StudentName=dto.StudentName,
+                
+                Email=dto.Email,
+                
+            };
+            CollegeRepository.Students.Add(student);
+          
+     
+            return Ok(student);
+        }
+
+
+
+
 
         [HttpGet]
         [Route("{name:alpha}")]

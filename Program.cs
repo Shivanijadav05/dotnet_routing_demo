@@ -1,4 +1,7 @@
 using MyWebApi.Middlewares;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +17,20 @@ builder.Services.AddSwaggerGen();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddFluentValidationAutoValidation()
+    .AddFluentValidationClientsideAdapters()
+    .AddValidatorsFromAssemblyContaining<UserValidation>();
+    builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:4200")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 
 
 var app = builder.Build();
@@ -28,6 +45,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowAngular");
 app.UseAuthorization();
 app.UseMiddleware<RequestLoggingMiddleware>();
 

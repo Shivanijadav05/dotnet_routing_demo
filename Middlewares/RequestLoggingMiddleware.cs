@@ -13,6 +13,10 @@ namespace MyWebApi.Middlewares;
          public async Task InvokeAsync(HttpContext context)
          {
             Console.WriteLine("Before request");
+            foreach (var header in context.Request.Headers)
+                {
+                    Console.WriteLine($"{header.Key}: {header.Value}");
+                }
 
             await _next(context);
 

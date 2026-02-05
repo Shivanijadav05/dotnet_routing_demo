@@ -19,4 +19,16 @@ public class StudentDTO
         public DateTime AdmissionDate {get;set;}
 
 }
+
+
+
+
+
+
+public class StudentDTOFluent
+{
+        public string StudentName {get;set;}
+
+        public string Email{get;set;}
+}
 }
