@@ -22,6 +22,15 @@ namespace MyWebApi.Controllers
         }
 
 
+        [HttpGet("test")]
+      
+        public IActionResult ThrowError()
+        {
+            throw new Exception("exception thrown");
+        }
+
+
+
         [HttpGet]
         public ActionResult<IEnumerable<StudentDTO>> GetStudents()
         {
@@ -85,8 +94,8 @@ namespace MyWebApi.Controllers
 
 
 
-        [HttpGet]
-        [Route("{name:alpha}")]
+        [HttpGet("by-name/{name:alpha}")]
+        // [Route("{name:alpha}")]
         public ActionResult<Student> GetStudentByName(string name)
         {
              if(string.IsNullOrEmpty(name))
@@ -140,7 +149,7 @@ namespace MyWebApi.Controllers
                 StudentName=model.StudentName,
                 Address=model.Address,
                 Email=model.Email,
-                AdmissionDate=model.AdmissionDate
+                // AdmissionDate=model.AdmissionDate
             };
             CollegeRepository.Students.Add(student);
             model.Id=newId;
@@ -164,7 +173,7 @@ namespace MyWebApi.Controllers
             existingStudent.StudentName=model.StudentName;
             existingStudent.Address=model.Address;
             existingStudent.Email=model.Email;
-            existingStudent.AdmissionDate=model.AdmissionDate;
+            // existingStudent.AdmissionDate=model.AdmissionDate;
 
             return NoContent();
 

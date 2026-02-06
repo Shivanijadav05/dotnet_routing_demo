@@ -17,10 +17,12 @@ builder.Services.AddSwaggerGen();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+
 builder.Services.AddFluentValidationAutoValidation()
     .AddFluentValidationClientsideAdapters()
     .AddValidatorsFromAssemblyContaining<UserValidation>();
-    builder.Services.AddCors(options =>
+    
+builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
         policy =>
@@ -48,6 +50,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAngular");
 app.UseAuthorization();
 app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
 
 
 app.MapControllers();
