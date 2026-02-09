@@ -1,7 +1,8 @@
 using MyWebApi.Middlewares;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-
+using Microsoft.EntityFrameworkCore;
+using MyWebApi.Database;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,18 @@ builder.Services.AddCors(options =>
 });
 
 
+
+builder.Services.AddDbContext<CollegeDBContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    ));
+
+
+
+
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -45,12 +58,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAngular");
 app.UseAuthorization();
-app.UseMiddleware<RequestLoggingMiddleware>();
-app.UseMiddleware<ExceptionMiddleware>();
+
 
 
 app.MapControllers();
