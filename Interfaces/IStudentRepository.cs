@@ -1,8 +1,8 @@
- using MyWebApi.Models;
+//  using MyWebApi.Models;
  
  
- public interface IStudentRepository
-{
-    IEnumerable<Student> GetStudents();
-    Student GetStudentById(int id);
-}
+//  public interface IStudentRepository
+// {
+//     IEnumerable<Student> GetStudents();
+//     Student GetStudentById(int id);
+// }

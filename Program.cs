@@ -17,11 +17,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+// 
+// builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
-builder.Services.AddFluentValidationAutoValidation()
-    .AddFluentValidationClientsideAdapters()
-    .AddValidatorsFromAssemblyContaining<UserValidation>();
+// builder.Services.AddFluentValidationAutoValidation()
+//     .AddFluentValidationClientsideAdapters()
+//     .AddValidatorsFromAssemblyContaining<UserValidation>();
     
 builder.Services.AddCors(options =>
 {

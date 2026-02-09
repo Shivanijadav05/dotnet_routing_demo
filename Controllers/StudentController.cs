@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using MyWebApi.Models;
+// using MyWebApi.Models;
 using Microsoft.Extensions.Logging;
 
 using MyWebApi.DTOs;
+using MyWebApi.Database;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace MyWebApi.Controllers
@@ -12,22 +14,25 @@ namespace MyWebApi.Controllers
     public class StudentController : ControllerBase
     {
 
-        private readonly IStudentRepository _repository;
+        // private readonly IStudentRepository _repository;
         private readonly ILogger<StudentController> _myLogger;
+        private readonly CollegeDBContext _dbContext;
 
-        public StudentController(IStudentRepository repository,ILogger<StudentController> Logger)
+        public StudentController(ILogger<StudentController> Logger,CollegeDBContext dbContext)
         {
-            _repository=repository;
+            // _repository=repository;
             _myLogger=Logger;
+            _dbContext=dbContext;
+
         }
 
 
-        [HttpGet("test")]
+        // [HttpGet("test")]
       
-        public IActionResult ThrowError()
-        {
-            throw new Exception("exception thrown");
-        }
+        // public IActionResult ThrowError()
+        // {
+        //     throw new Exception("exception thrown");
+        // }
 
 
 
@@ -35,7 +40,7 @@ namespace MyWebApi.Controllers
         public ActionResult<IEnumerable<StudentDTO>> GetStudents()
         {
                    _myLogger.LogInformation("GETTINGT STUDENTS");
-                var students=_repository.GetStudents().Select(s=>new StudentDTO()
+                var students=_dbContext.Students.Select(s=>new StudentDTO()
                 {
                         Id=s.Id,
                         StudentName=s.StudentName,
@@ -48,13 +53,13 @@ namespace MyWebApi.Controllers
 
 
          [HttpGet("{id:int}",Name="GetStudentById")]
-        public ActionResult<Student> GetStudentById(int id)
+        public ActionResult<StudentDTO> GetStudentById(int id)
         {
             if(id<=0)
             {
                 return BadRequest();  //400 client error
             }
-            var student=_repository.GetStudentById(id);
+            var student=_dbContext.Students.Where(n=>n.Id==id).FirstOrDefault();
             if(student==null)
             {
                 return NotFound($"The student with {id} doesnt exist"); // 404 client error
@@ -71,24 +76,24 @@ namespace MyWebApi.Controllers
             
         }
                 // creating student using fluent validations 
-        [HttpPost]
-        [Route("create-fluent")]
-        public ActionResult<Student> CreateStudentFluent([FromBody]StudentDTOFluent dto)
-        {
+        // [HttpPost]
+        // [Route("create-fluent")]
+        // public ActionResult<StudentDTO> CreateStudentFluent([FromBody]StudentDTOFluent dto)
+        // {
                  
-             Student student=new Student
-            {
+        //      Student student=new Student
+        //     {
                 
-                StudentName=dto.StudentName,
+        //         StudentName=dto.StudentName,
                 
-                Email=dto.Email,
+        //         Email=dto.Email,
                 
-            };
-            CollegeRepository.Students.Add(student);
+        //     };
+        //     CollegeRepository.Students.Add(student);
           
      
-            return Ok(student);
-        }
+        //     return Ok(student);
+        // }
 
 
 
@@ -96,18 +101,25 @@ namespace MyWebApi.Controllers
 
         [HttpGet("by-name/{name:alpha}")]
         // [Route("{name:alpha}")]
-        public ActionResult<Student> GetStudentByName(string name)
+        public ActionResult<StudentDTO> GetStudentByName(string name)
         {
              if(string.IsNullOrEmpty(name))
             {
                 return BadRequest();  //400 client error
             }
-            var student=CollegeRepository.Students.Where(n=>n.StudentName==name).FirstOrDefault();
+            var student=_dbContext.Students.Where(n=>n.StudentName==name).FirstOrDefault();
             if(student==null)
             {
                 return NotFound($"The student with {name} doesnt exist"); // 404 client error
             }
-            return Ok(student);
+            var studentDTO=new StudentDTO
+            {
+                         Id=student.Id,
+                        StudentName=student.StudentName,
+                        Address=student.Address,
+                        Email=student.Email
+            };
+            return Ok(studentDTO);
             // return CollegeRepository.Students.Where(n=>n.StudentName==name).FirstOrDefault();
         }
 
@@ -119,13 +131,14 @@ namespace MyWebApi.Controllers
             {
                 return BadRequest();  //400 client error
             }
-            var student=CollegeRepository.Students.Where(n=>n.Id==id).FirstOrDefault();
+            var student=_dbContext.Students.Where(n=>n.Id==id).FirstOrDefault();
             if(student==null)
             {
                 return NotFound($"The student with {id} doesnt exist"); // 404 client error
             }
            
-            CollegeRepository.Students.Remove(student);
+            _dbContext.Students.Remove(student);
+              _dbContext.SaveChanges();
             return Ok(true);
         }
 
@@ -138,21 +151,22 @@ namespace MyWebApi.Controllers
         public ActionResult<StudentDTO> CreateStudent([FromBody]StudentDTO model)
         {
            
-            if(model==null)
+            if(!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
-            int newId=CollegeRepository.Students.LastOrDefault().Id+1;
+            // int newId=_dbContext.Students.LastOrDefault().Id+1;
             Student student=new Student
             {
-                Id=newId,
+                // Id=newId,
                 StudentName=model.StudentName,
                 Address=model.Address,
                 Email=model.Email,
                 // AdmissionDate=model.AdmissionDate
             };
-            CollegeRepository.Students.Add(student);
-            model.Id=newId;
+            _dbContext.Students.Add(student);
+            _dbContext.SaveChanges();
+            // model.Id=newId;
             return CreatedAtRoute("GetStudentById",new {id=model.Id},model);
         } 
 
@@ -165,7 +179,7 @@ namespace MyWebApi.Controllers
                 return BadRequest();
             }
 
-            var existingStudent=CollegeRepository.Students.Where(s=>s.Id==model.Id).FirstOrDefault();
+            var existingStudent=_dbContext.Students.Where(s=>s.Id==model.Id).FirstOrDefault();
             if(existingStudent==null)
             {
                 return NotFound();
@@ -173,6 +187,7 @@ namespace MyWebApi.Controllers
             existingStudent.StudentName=model.StudentName;
             existingStudent.Address=model.Address;
             existingStudent.Email=model.Email;
+              _dbContext.SaveChanges();
             // existingStudent.AdmissionDate=model.AdmissionDate;
 
             return NoContent();

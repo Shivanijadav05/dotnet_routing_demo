@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MyWebApi.Database.Config;
 
 namespace MyWebApi.Database
 {
@@ -10,27 +11,13 @@ namespace MyWebApi.Database
             {
             }
 
-        DbSet<Student> Students{get;set;}
+       public DbSet<Student> Students{get;set;}
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Student>().HasData(new List<Student>()
-            {
-                new Student
-                {
-                    Id=1,
-                    StudentName="Name1",
-                    Email="name1@gmail.com",
-                    Address="abc"
-                },
-                  new Student
-                {
-                    Id=2,
-                    StudentName="Name2",
-                    Email="name2@gmail.com",
-                    Address="def"
+           
+          modelBuilder.ApplyConfiguration(new StudentConfig());
 
-                }
-            });
+
         }
     }
 }
