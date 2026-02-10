@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using MyWebApi.DTOs;
 using MyWebApi.Database;
 using Microsoft.EntityFrameworkCore;
+using MyWebApi.Configutations;
+using AutoMapper;
 
 
 namespace MyWebApi.Controllers
@@ -18,11 +20,14 @@ namespace MyWebApi.Controllers
         private readonly ILogger<StudentController> _myLogger;
         private readonly CollegeDBContext _dbContext;
 
-        public StudentController(ILogger<StudentController> Logger,CollegeDBContext dbContext)
+        private readonly IMapper _mapper;
+
+        public StudentController(ILogger<StudentController> Logger,CollegeDBContext dbContext )
         {
             // _repository=repository;
             _myLogger=Logger;
             _dbContext=dbContext;
+           
 
         }
 
@@ -37,29 +42,30 @@ namespace MyWebApi.Controllers
 
 
         [HttpGet]
-        public ActionResult<IEnumerable<StudentDTO>> GetStudents()
+        public async  Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
         {
                    _myLogger.LogInformation("GETTINGT STUDENTS");
-                var students=_dbContext.Students.Select(s=>new StudentDTO()
-                {
-                        Id=s.Id,
-                        StudentName=s.StudentName,
-                        Address=s.Address,
-                        Email=s.Email
-                });
+                   var students=await _dbContext.Students.Select(s=>new StudentDTO()
+                            {
+                                    Id=s.Id,
+                                    StudentName=s.StudentName,
+                                    Address=s.Address,
+                                    Email=s.Email
+                            }).ToListAsync();
+               
 
             return Ok(students);
         }
 
 
          [HttpGet("{id:int}",Name="GetStudentById")]
-        public ActionResult<StudentDTO> GetStudentById(int id)
+        public async Task<ActionResult<StudentDTO>> GetStudentById(int id)
         {
             if(id<=0)
             {
                 return BadRequest();  //400 client error
             }
-            var student=_dbContext.Students.Where(n=>n.Id==id).FirstOrDefault();
+            var student=await _dbContext.Students.Where(n=>n.Id==id).FirstOrDefaultAsync();
             if(student==null)
             {
                 return NotFound($"The student with {id} doesnt exist"); // 404 client error
@@ -101,13 +107,13 @@ namespace MyWebApi.Controllers
 
         [HttpGet("by-name/{name:alpha}")]
         // [Route("{name:alpha}")]
-        public ActionResult<StudentDTO> GetStudentByName(string name)
+        public async Task<ActionResult<StudentDTO>> GetStudentByName(string name)
         {
              if(string.IsNullOrEmpty(name))
             {
                 return BadRequest();  //400 client error
             }
-            var student=_dbContext.Students.Where(n=>n.StudentName==name).FirstOrDefault();
+            var student=await _dbContext.Students.Where(n=>n.StudentName==name).FirstOrDefaultAsync();
             if(student==null)
             {
                 return NotFound($"The student with {name} doesnt exist"); // 404 client error
@@ -124,21 +130,21 @@ namespace MyWebApi.Controllers
         }
 
           [HttpDelete("{id:int}")]
-        public ActionResult<bool> DeleteStudentById(int id)
+        public async Task<ActionResult<bool>> DeleteStudentById(int id)
         {
             
               if(id<=0)
             {
                 return BadRequest();  //400 client error
             }
-            var student=_dbContext.Students.Where(n=>n.Id==id).FirstOrDefault();
+            var student= await _dbContext.Students.Where(n=>n.Id==id).FirstOrDefaultAsync();
             if(student==null)
             {
                 return NotFound($"The student with {id} doesnt exist"); // 404 client error
             }
            
             _dbContext.Students.Remove(student);
-              _dbContext.SaveChanges();
+              await _dbContext.SaveChangesAsync();
             return Ok(true);
         }
 
@@ -148,7 +154,7 @@ namespace MyWebApi.Controllers
             [ProducesResponseType(StatusCodes.Status201Created)]
             [ProducesResponseType(StatusCodes.Status400BadRequest)]
             [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<StudentDTO> CreateStudent([FromBody]StudentDTO model)
+        public async Task<ActionResult<StudentDTO>> CreateStudent([FromBody]StudentDTO model)
         {
            
             if(!ModelState.IsValid)
@@ -164,30 +170,37 @@ namespace MyWebApi.Controllers
                 Email=model.Email,
                 // AdmissionDate=model.AdmissionDate
             };
-            _dbContext.Students.Add(student);
-            _dbContext.SaveChanges();
+            await _dbContext.Students.AddAsync(student);
+            await _dbContext.SaveChangesAsync();
             // model.Id=newId;
             return CreatedAtRoute("GetStudentById",new {id=model.Id},model);
         } 
 
 
             [HttpPut]
-        public ActionResult UpdateStudent([FromBody]StudentDTO model)
+        public async Task<ActionResult> UpdateStudent([FromBody]StudentDTO model)
         {
             if(model==null)
             {
                 return BadRequest();
             }
 
-            var existingStudent=_dbContext.Students.Where(s=>s.Id==model.Id).FirstOrDefault();
+            var existingStudent=await _dbContext.Students.AsNoTracking().Where(s=>s.Id==model.Id).FirstOrDefaultAsync();
             if(existingStudent==null)
             {
                 return NotFound();
             }
-            existingStudent.StudentName=model.StudentName;
-            existingStudent.Address=model.Address;
-            existingStudent.Email=model.Email;
-              _dbContext.SaveChanges();
+            var newRecord=new Student()
+            {
+                Id=existingStudent.Id,
+                StudentName=model.StudentName,
+                Address=model.Address,
+                Email=model.Email
+
+            } ;
+           
+              _dbContext.Students.Update(newRecord);
+              await _dbContext.SaveChangesAsync();
             // existingStudent.AdmissionDate=model.AdmissionDate;
 
             return NoContent();

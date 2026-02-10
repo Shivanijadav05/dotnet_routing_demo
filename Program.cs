@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using MyWebApi.Database;
+using MyWebApi.Configutations;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,7 +45,7 @@ builder.Services.AddDbContext<CollegeDBContext>(options =>
     ));
 
 
-
+builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
 
 
