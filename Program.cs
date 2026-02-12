@@ -45,7 +45,7 @@ builder.Services.AddDbContext<CollegeDBContext>(options =>
     ));
 
 
-builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
+// builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
 
 

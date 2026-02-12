@@ -36,7 +36,9 @@ namespace MyWebApi.Database.Config
                             }
                         }
                 ));
+                builder.HasOne(n=>n.Department).WithMany(n=>n.Students).HasForeignKey(n=>n.DepartmentId).HasConstraintName("FK_Students_Department");
 
+                
             }
     }
 }

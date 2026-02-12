@@ -45,7 +45,7 @@ namespace MyWebApi.Controllers
         public async  Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
         {
                    _myLogger.LogInformation("GETTINGT STUDENTS");
-                   var students=await _dbContext.Students.Select(s=>new StudentDTO()
+                   var students=await _dbContext.Students.AsNoTracking().Select(s=>new StudentDTO()
                             {
                                     Id=s.Id,
                                     StudentName=s.StudentName,
@@ -58,6 +58,57 @@ namespace MyWebApi.Controllers
         }
 
 
+        [HttpGet("with-department")]
+        public async Task<ActionResult> GetStudentsWithDepartment()
+        {
+            var students = await _dbContext.Students
+                .AsNoTracking()
+                .Select(s => new
+                {
+                    s.Id,
+                    s.StudentName,
+                    s.Email,
+                    DepartmentName = s.Department.DepartmentName
+                })
+                .ToListAsync();
+
+            return Ok(students);
+        }
+
+        // [HttpGet("student-course-dept")]
+        //     public async Task<IActionResult> GetStudentCourseDepartment()
+        //     {
+        //         var result = await _dbContext.StudentCourses
+        //             .AsNoTracking()
+        //             .Select(sc => new
+        //             {
+        //                 StudentId = sc.StudentId,
+        //                 CourseId = sc.CourseId,
+        //                 DepartmentId = sc.Student.DepartmentId
+        //             })
+        //             .ToListAsync();
+
+        //         return Ok(result);
+        //     }
+
+        [HttpGet("StudentDepartmentCourse")]
+            public async Task<ActionResult<IEnumerable<StudentCourseDepartmentDTO>>> GetStudentDepartmentCourse()
+            {
+                var result = await _dbContext.Students
+                    .Include(s => s.Courses)
+                    .SelectMany(s => s.Courses.Select(c => new StudentCourseDepartmentDTO
+                    {
+                        StudentId = s.Id,
+                        DepartmentId = s.DepartmentId,
+                        CourseId = c.Id
+                    }))
+                    .ToListAsync();
+
+                return Ok(result);
+            }
+
+
+
          [HttpGet("{id:int}",Name="GetStudentById")]
         public async Task<ActionResult<StudentDTO>> GetStudentById(int id)
         {
@@ -65,7 +116,11 @@ namespace MyWebApi.Controllers
             {
                 return BadRequest();  //400 client error
             }
-            var student=await _dbContext.Students.Where(n=>n.Id==id).FirstOrDefaultAsync();
+            var student=await _dbContext.Students.AsNoTracking().Where(n=>n.Id==id)
+            .Select(s=>new StudentDTO{
+                Id=s.Id,
+                StudentName=s.StudentName
+            }).FirstOrDefaultAsync();
             if(student==null)
             {
                 return NotFound($"The student with {id} doesnt exist"); // 404 client error
