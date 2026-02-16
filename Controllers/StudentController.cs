@@ -7,12 +7,14 @@ using MyWebApi.Database;
 using Microsoft.EntityFrameworkCore;
 using MyWebApi.Configutations;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace MyWebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class StudentController : ControllerBase
     {
 
@@ -40,7 +42,7 @@ namespace MyWebApi.Controllers
         // }
 
 
-
+        [AllowAnonymous]
         [HttpGet]
         public async  Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
         {

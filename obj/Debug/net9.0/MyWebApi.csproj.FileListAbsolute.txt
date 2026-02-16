@@ -202,3 +202,4 @@ D:\Main-project\dotnet\new\MyWebApi\bin\Debug\net9.0\Microsoft.Extensions.Loggin
 D:\Main-project\dotnet\new\MyWebApi\bin\Debug\net9.0\Microsoft.Extensions.Options.dll
 D:\Main-project\dotnet\new\MyWebApi\bin\Debug\net9.0\Microsoft.Extensions.Primitives.dll
 D:\Main-project\dotnet\new\MyWebApi\bin\Debug\net9.0\System.Diagnostics.DiagnosticSource.dll
+D:\Main-project\dotnet\new\MyWebApi\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
