@@ -2,6 +2,7 @@ using MyWebApi.Middlewares;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using MyWebApi.Database;
 using MyWebApi.Configutations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -51,7 +52,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddOpenApi();
 // 
 // builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-
+builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 // builder.Services.AddFluentValidationAutoValidation()
 //     .AddFluentValidationClientsideAdapters()
 //     .AddValidatorsFromAssemblyContaining<UserValidation>();
@@ -105,8 +107,15 @@ builder.Services.AddAuthentication(options =>
         });
 
 
-builder.Services.AddAuthorization();
-
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("EmailExistsPolicy", policy =>
+        policy.Requirements.Add(new EmailExistsRequirement()));
+});
+builder.Services.AddScoped<IAuthorizationHandler, EmailExistsHandler>();
+// builder.Services.AddScoped<
+//     Microsoft.AspNetCore.Authorization.IAuthorizationHandler,
+//     EmailExistsHandler>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

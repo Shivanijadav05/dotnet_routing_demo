@@ -14,7 +14,8 @@ namespace MyWebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    
+     [Authorize]
     public class StudentController : ControllerBase
     {
 
@@ -23,12 +24,17 @@ namespace MyWebApi.Controllers
         private readonly CollegeDBContext _dbContext;
 
         private readonly IMapper _mapper;
+        private readonly IPasswordService _passwordService;
 
-        public StudentController(ILogger<StudentController> Logger,CollegeDBContext dbContext )
+        public StudentController(ILogger<StudentController> Logger,
+                        CollegeDBContext dbContext,
+                        IPasswordService passwordService
+                        )
         {
             // _repository=repository;
             _myLogger=Logger;
             _dbContext=dbContext;
+            _passwordService=passwordService;
            
 
         }
@@ -52,7 +58,8 @@ namespace MyWebApi.Controllers
                                     Id=s.Id,
                                     StudentName=s.StudentName,
                                     Address=s.Address,
-                                    Email=s.Email
+                                    Email=s.Email,
+                                    Password=s.Password
                             }).ToListAsync();
                
 
@@ -110,7 +117,7 @@ namespace MyWebApi.Controllers
             }
 
 
-
+      [Authorize(Policy = "EmailExistsPolicy")]
          [HttpGet("{id:int}",Name="GetStudentById")]
         public async Task<ActionResult<StudentDTO>> GetStudentById(int id)
         {
@@ -121,7 +128,9 @@ namespace MyWebApi.Controllers
             var student=await _dbContext.Students.AsNoTracking().Where(n=>n.Id==id)
             .Select(s=>new StudentDTO{
                 Id=s.Id,
-                StudentName=s.StudentName
+                StudentName=s.StudentName,
+                Address = s.Address,
+                 Email = s.Email
             }).FirstOrDefaultAsync();
             if(student==null)
             {
@@ -204,8 +213,7 @@ namespace MyWebApi.Controllers
               await _dbContext.SaveChangesAsync();
             return Ok(true);
         }
-
-       
+            [AllowAnonymous]
         [HttpPost]
         [Route("Create") ]
             [ProducesResponseType(StatusCodes.Status201Created)]
@@ -225,6 +233,7 @@ namespace MyWebApi.Controllers
                 StudentName=model.StudentName,
                 Address=model.Address,
                 Email=model.Email,
+                Password=_passwordService.HashPassword(model.Password)
                 // AdmissionDate=model.AdmissionDate
             };
             await _dbContext.Students.AddAsync(student);

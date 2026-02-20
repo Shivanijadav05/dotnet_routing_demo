@@ -14,6 +14,7 @@ public class StudentDTO
         
 
         public string Address {get;set;}
+        public string Password{get;set;}
 
         //  [DateValidation]
         // public DateTime AdmissionDate {get;set;}
